@@ -269,7 +269,7 @@
 
     async function cargarDatos() {
       try {
-        const res = await fetch('https://clima-lluvia-amba.onrender.com');
+        const res = await fetch('https://clima-lluvia-amba.onrender.com/api/lluvia-todas');
         const ciudades = await res.json();
 
         let maxLluviaGlobal = 5;
