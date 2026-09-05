@@ -8,9 +8,9 @@ app.use(cors({ origin: '*' }));
 const PORT = 3000;
 
 const UBICACIONES = [
-  { id: 'escobar', nombre: 'Belén de Escobar', lat: -34.348, lon: -58.791 },
+  { id: 'laplata', nombre: 'La Plata', lat: -34.9214, lon: -57.9545 },
   { id: 'caba', nombre: 'CABA', lat: -34.6037, lon: -58.3816 },
-  { id: 'laplata', nombre: 'La Plata', lat: -34.9214, lon: -57.9545 }
+  { id: 'escobar', nombre: 'Belén de Escobar', lat: -34.348, lon: -58.791 }
 ];
 
 app.get('/api/lluvia-todas', async (req, res) => {

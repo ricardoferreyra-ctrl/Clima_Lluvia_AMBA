@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Precipitaciones - AMBA y La Plata</title>
+  <title>Precipitaciones - La Plata, CABA y Escobar</title>
   <style>
     :root {
       --bg-main: #f3f4f6;
@@ -11,12 +11,13 @@
       --text-main: #1f2937;
       --text-muted: #6b7280;
       --color-real: #64748b;        /* Slate */
+      --color-estimado-pasado: #93c5fd; /* Light Blue */
       --color-cercano: #2563eb;     /* Blue */
-      --color-extendido: #7c3aed;   /* Purple / Indigo */
+      --color-extendido: #7c3aed;   /* Purple */
     }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background-color: var(--bg-main);
       color: var(--text-main);
       margin: 0;
@@ -37,8 +38,6 @@
       font-size: 1.75rem;
       font-weight: 700;
       margin: 0 0 8px 0;
-      color: #111827;
-      letter-spacing: -0.5px;
     }
 
     p.subtitle {
@@ -47,7 +46,6 @@
       font-size: 0.9rem;
     }
 
-    /* Leyenda superior */
     .legend {
       display: flex;
       justify-content: center;
@@ -71,7 +69,6 @@
       border-radius: 50%;
     }
 
-    /* Grid principal */
     .columns-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -89,13 +86,7 @@
       border-radius: 16px;
       padding: 24px;
       border: 1px solid #e5e7eb;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .city-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
     }
 
     .city-title {
@@ -103,7 +94,6 @@
       font-weight: 700;
       margin: 0 0 20px 0;
       text-align: center;
-      color: #111827;
       border-bottom: 2px solid #f3f4f6;
       padding-bottom: 12px;
     }
@@ -121,7 +111,6 @@
       text-transform: uppercase;
       letter-spacing: 0.6px;
       color: var(--text-muted);
-      margin: 0;
     }
 
     .badge {
@@ -132,27 +121,63 @@
       text-transform: uppercase;
     }
 
-    .badge-cercano {
-      background-color: #dbeafe;
-      color: #1e40af;
+    .badge-cercano { background-color: #dbeafe; color: #1e40af; }
+    .badge-extendido { background-color: #f3e8ff; color: #6b21a8; }
+
+    /* Estilos para el Bloque Comparativo Histórico */
+    .history-block {
+      margin-bottom: 12px;
+      background: #f8fafc;
+      padding: 8px 10px;
+      border-radius: 8px;
     }
 
-    .badge-extendido {
-      background-color: #f3e8ff;
-      color: #6b21a8;
+    .history-header {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #374151;
+      margin-bottom: 6px;
     }
 
-    /* Filas y barras de progreso */
+    .sub-row {
+      display: flex;
+      align-items: center;
+      margin-bottom: 3px;
+    }
+
+    .sub-label {
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      width: 42px;
+      flex-shrink: 0;
+      text-transform: uppercase;
+    }
+
+    .bar-container-sm {
+      flex-grow: 1;
+      background-color: #e5e7eb;
+      height: 5px;
+      border-radius: 3px;
+      overflow: hidden;
+      margin: 0 8px;
+    }
+
+    .bar {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 0.4s ease;
+    }
+
+    .bar-real { background-color: var(--color-real); }
+    .bar-est-pasado { background-color: var(--color-estimado-pasado); }
+    .bar-cercano { background-color: var(--color-cercano); }
+    .bar-extendido { background-color: var(--color-extendido); opacity: 0.85; }
+
+    /* Filas de pronóstico simple */
     .row {
       display: flex;
       align-items: center;
       margin-bottom: 7px;
-    }
-
-    .row-highlight {
-      background-color: #f8fafc;
-      border-radius: 6px;
-      padding: 2px 4px;
     }
 
     .fecha {
@@ -172,42 +197,16 @@
       margin: 0 10px;
     }
 
-    .bar {
-      height: 100%;
-      border-radius: 4px;
-      transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .bar-historical { background-color: var(--color-real); }
-    .bar-cercano { background-color: var(--color-cercano); }
-    .bar-extendido { 
-      background-color: var(--color-extendido); 
-      opacity: 0.85;
-    }
-
     .mm {
-      font-size: 0.78rem;
+      font-size: 0.75rem;
       width: 48px;
       text-align: right;
       flex-shrink: 0;
       color: #374151;
     }
 
-    .mm-bold {
-      font-weight: 700;
-      color: #111827;
-    }
-
-    .sin-lluvia {
-      color: #d1d5db;
-      font-weight: 400;
-    }
-
-    .divider {
-      height: 1px;
-      background-color: #f3f4f6;
-      margin: 16px 0;
-    }
+    .sin-lluvia { color: #d1d5db; font-weight: 400; }
+    .divider { height: 1px; background-color: #f3f4f6; margin: 16px 0; }
   </style>
 </head>
 <body>
@@ -215,16 +214,20 @@
   <div class="container">
     <header>
       <h1>Precipitaciones en Buenos Aires</h1>
-      <p class="subtitle">Análisis histórico y pronóstico extendido de milímetros acumulados</p>
+      <p class="subtitle">Análisis comparativo de precisión y pronóstico extendido</p>
       
       <div class="legend">
         <div class="legend-item">
           <div class="legend-dot" style="background-color: var(--color-real);"></div>
-          <span>Pasado (Real)</span>
+          <span>Medido (Real)</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background-color: var(--color-estimado-pasado);"></div>
+          <span>Estimación Previa</span>
         </div>
         <div class="legend-item">
           <div class="legend-dot" style="background-color: var(--color-cercano);"></div>
-          <span>Días 1-7 (Alta precisión)</span>
+          <span>Próximos 7 días</span>
         </div>
         <div class="legend-item">
           <div class="legend-dot" style="background-color: var(--color-extendido);"></div>
@@ -242,26 +245,54 @@
       return `${dia}/${mes}`;
     }
 
-    function generarBloqueFilas(items, tipo, maxLluvia) {
+    // Renderiza el bloque histórico de 5 días con doble barra (Real vs Estimado)
+    function generarHistoricoComparativo(items, maxLluvia) {
       return items.map(item => {
-        const mm = tipo === 'historico' ? item.mm_reales : item.mm_estimados;
-        const porcentaje = Math.min((mm / maxLluvia) * 100, 100);
-        
-        let claseBarra = 'bar-historical';
-        if (tipo === 'cercano') claseBarra = 'bar-cercano';
-        if (tipo === 'extendido') claseBarra = 'bar-extendido';
+        const mmReal = item.mm_reales ?? 0;
+        // Si no cuentas con estimado previo guardado, puedes simularlo para testing
+        const mmEst = item.mm_estimados ?? mmReal; 
 
-        const esLluviaRelevante = mm >= 5;
-        const claseTexto = mm > 0 ? (esLluviaRelevante ? 'mm mm-bold' : 'mm') : 'mm sin-lluvia';
-        const textoMM = mm > 0 ? `${mm} <small>mm</small>` : `0 mm`;
+        const pctReal = Math.min((mmReal / maxLluvia) * 100, 100);
+        const pctEst = Math.min((mmEst / maxLluvia) * 100, 100);
 
         return `
-          <div class="row ${esLluviaRelevante ? 'row-highlight' : ''}">
+          <div class="history-block">
+            <div class="history-header">${formatearFecha(item.fecha)}</div>
+            
+            <div class="sub-row">
+              <span class="sub-label">Real</span>
+              <div class="bar-container-sm">
+                <div class="bar bar-real" style="width: ${pctReal}%;"></div>
+              </div>
+              <span class="mm">${mmReal > 0 ? mmReal + ' <small>mm</small>' : '<span class="sin-lluvia">0 mm</span>'}</span>
+            </div>
+
+            <div class="sub-row">
+              <span class="sub-label">Est.</span>
+              <div class="bar-container-sm">
+                <div class="bar bar-est-pasado" style="width: ${pctEst}%;"></div>
+              </div>
+              <span class="mm">${mmEst > 0 ? mmEst + ' <small>mm</small>' : '<span class="sin-lluvia">0 mm</span>'}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Renderiza los bloques de pronóstico estándar (1 sola barra)
+    function generarBloquePronostico(items, tipo, maxLluvia) {
+      return items.map(item => {
+        const mm = item.mm_estimados;
+        const porcentaje = Math.min((mm / maxLluvia) * 100, 100);
+        const claseBarra = tipo === 'cercano' ? 'bar-cercano' : 'bar-extendido';
+
+        return `
+          <div class="row">
             <span class="fecha">${formatearFecha(item.fecha)}</span>
             <div class="bar-container">
               <div class="bar ${claseBarra}" style="width: ${porcentaje}%;"></div>
             </div>
-            <span class="${claseTexto}">${textoMM}</span>
+            <span class="mm">${mm > 0 ? mm + ' <small>mm</small>' : '<span class="sin-lluvia">0 mm</span>'}</span>
           </div>
         `;
       }).join('');
@@ -274,13 +305,16 @@
 
         let maxLluviaGlobal = 5;
         ciudades.forEach(c => {
-          c.historico.forEach(i => { if (i.mm_reales > maxLluviaGlobal) maxLluviaGlobal = i.mm_reales; });
-          c.pronostico.forEach(i => { if (i.mm_estimados > maxLluviaGlobal) maxLluviaGlobal = i.mm_estimados; });
+          c.historico.forEach(i => { 
+            if (i.mm_reales > maxLluviaGlobal) maxLluviaGlobal = i.mm_reales; 
+          });
+          c.pronostico.forEach(i => { 
+            if (i.mm_estimados > maxLluviaGlobal) maxLluviaGlobal = i.mm_estimados; 
+          });
         });
 
         const contenedor = document.getElementById('grid-ciudades');
         contenedor.innerHTML = ciudades.map(ciudad => {
-          // Separar el pronóstico en los primeros 7 días y los 7 finales
           const pronosticoCercano = ciudad.pronostico.slice(0, 7);
           const pronosticoExtendido = ciudad.pronostico.slice(7, 14);
 
@@ -289,9 +323,9 @@
               <h2 class="city-title">${ciudad.nombre}</h2>
               
               <div class="section-header">
-                <span class="section-subtitle">Últimos 5 días</span>
+                <span class="section-subtitle">Últimos 5 días (Comparativa)</span>
               </div>
-              ${generarBloqueFilas(ciudad.historico, 'historico', maxLluviaGlobal)}
+              ${generarHistoricoComparativo(ciudad.historico, maxLluviaGlobal)}
 
               <div class="divider"></div>
 
@@ -299,7 +333,7 @@
                 <span class="section-subtitle">Próximos 7 días</span>
                 <span class="badge badge-cercano">Alta precisión</span>
               </div>
-              ${generarBloqueFilas(pronosticoCercano, 'cercano', maxLluviaGlobal)}
+              ${generarBloquePronostico(pronosticoCercano, 'cercano', maxLluviaGlobal)}
 
               <div class="divider"></div>
 
@@ -307,7 +341,7 @@
                 <span class="section-subtitle">Días 8 a 14</span>
                 <span class="badge badge-extendido">Tendencia</span>
               </div>
-              ${generarBloqueFilas(pronosticoExtendido, 'extendido', maxLluviaGlobal)}
+              ${generarBloquePronostico(pronosticoExtendido, 'extendido', maxLluviaGlobal)}
             </div>
           `;
         }).join('');
