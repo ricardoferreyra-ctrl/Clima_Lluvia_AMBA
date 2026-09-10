@@ -58,18 +58,26 @@ app.get('/api/rio-escobar', async (req, res) => {
     const url = 'https://alerta.ina.gob.ar/pub/gui/datosProno?calId=489&seriesId=3398&timeStart=now-1days&timeEnd=now%2B4days&auto=true';
     const response = await fetch(url);
     const data = await response.json();
-    
-    // Extraemos la serie de pronóstico
-    const pronosticoRio = data[0].series[0].pronostico.map(p => ({
+
+    // Validar que la respuesta sea un arreglo con datos válidos
+    if (!Array.isArray(data) || data.length === 0 || !data[0].series || data[0].series.length === 0) {
+      return res.status(404).json({ error: "Sin datos disponibles del INA" });
+    }
+
+    const serieProno = data[0].series.find(s => s.qualifier === 'prono') || data[0].series[0];
+    const puntos = serieProno.pronostico || [];
+
+    const pronosticoRio = puntos.map(p => ({
       fechaHora: p.timestart,
       nivelMetros: p.valor
     }));
 
     res.json(pronosticoRio);
   } catch (error) {
-    console.error(error);
+    console.error("Error al consultar INA:", error);
     res.status(500).json({ error: "No se pudo obtener el nivel del río" });
   }
+});
 });app.listen(PORT, () => {
   console.log(`Servidor ejecutándose en http://localhost:${PORT}`);
 });
