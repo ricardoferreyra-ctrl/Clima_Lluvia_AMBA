@@ -166,6 +166,64 @@
 
     .sin-lluvia { color: #d1d5db; font-weight: 400; }
     .divider { height: 1px; background-color: #f3f4f6; margin: 16px 0; }
+
+    /* Estilos para el Widget del Río Luján (Escobar) */
+    .rio-widget {
+      margin-top: 16px;
+      padding: 14px;
+      background-color: #f0f9ff;
+      border-radius: 10px;
+      border: 1px solid #bae6fd;
+    }
+
+    .rio-title {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #0369a1;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin: 0 0 10px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .rio-status {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .rio-val {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: #111827;
+      margin-right: 10px;
+    }
+
+    .rio-subtitle {
+      font-size: 0.75rem;
+      color: #075985;
+      font-weight: 500;
+    }
+
+    .badge-rio {
+      background-color: #dbeafe;
+      color: #1e40af;
+      border: 1px solid #bfdbfe;
+    }
+    
+    .badge-warning-rio {
+      background-color: #fef3c7;
+      color: #92400e;
+      border: 1px solid #fde68a;
+    }
+    
+    .badge-danger-rio {
+      background-color: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
+    }
   </style>
 </head>
 <body>
@@ -221,6 +279,52 @@
       }).join('');
     }
 
+    async function cargarDatosRio() {
+      try {
+        const resRio = await fetch('https://clima-lluvia-amba.onrender.com/api/rio-escobar');
+        const pronosticoRio = await resRio.json();
+        
+        const content = document.getElementById('rio-escobar-content');
+        if (!content || !pronosticoRio || pronosticoRio.length === 0) return;
+
+        const picoMax = pronosticoRio.reduce((max, p) => p.nivelMetros > max.nivelMetros ? p : max, pronosticoRio[0]);
+        
+        let badgeClass = 'badge badge-rio';
+        let statusText = 'Normal';
+        
+        if (picoMax.nivelMetros >= 2.20) {
+          badgeClass = 'badge badge-warning-rio';
+          statusText = 'Alerta';
+        }
+        if (picoMax.nivelMetros >= 2.50) {
+          badgeClass = 'badge badge-danger-rio';
+          statusText = 'Evacuación';
+        }
+
+        const datePico = new Date(picoMax.fechaHora);
+        const fechaStr = `${datePico.getDate()}/${datePico.getMonth()+1}`;
+
+        content.innerHTML = `
+          <div class="rio-title">
+            <span>Río Luján (INA)</span>
+            <span class="${badgeClass}">${statusText}</span>
+          </div>
+          <div class="rio-status">
+            <span class="rio-val">${picoMax.nivelMetros.toFixed(2)} m</span>
+            <span class="rio-subtitle">Max. prono. (${fechaStr})</span>
+          </div>
+        `;
+
+      } catch (err) {
+        console.error(err);
+        const content = document.getElementById('rio-escobar-content');
+        if (content) {
+          content.innerText = 'Error al cargar nivel del río';
+          content.style.backgroundColor = '#fee2e2';
+        }
+      }
+    }
+
     async function cargarDatos() {
       try {
         const res = await fetch('https://clima-lluvia-amba.onrender.com/api/lluvia-todas');
@@ -237,7 +341,7 @@
           const pronosticoCercano = ciudad.pronostico.slice(0, 7);
           const pronosticoExtendido = ciudad.pronostico.slice(7, 14);
 
-          return `
+          let htmlCard = `
             <div class="city-card">
               <h2 class="city-title">${ciudad.nombre}</h2>
               
@@ -261,9 +365,22 @@
                 <span class="badge badge-extendido">Tendencia</span>
               </div>
               ${generarBloqueFilas(pronosticoExtendido, 'extendido', maxLluviaGlobal)}
-            </div>
           `;
+
+          if (ciudad.id === 'escobar') {
+            htmlCard += `
+              <div class="divider"></div>
+              <div class="rio-widget" id="rio-escobar-content">
+                Cargando nivel del río Luján...
+              </div>
+            `;
+          }
+
+          htmlCard += `</div>`;
+          return htmlCard;
         }).join('');
+
+        await cargarDatosRio();
 
       } catch (err) {
         console.error(err);

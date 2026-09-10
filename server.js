@@ -53,6 +53,23 @@ app.get('/api/lluvia-todas', async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
+app.get('/api/rio-escobar', async (req, res) => {
+  try {
+    const url = 'https://alerta.ina.gob.ar/pub/gui/datosProno?calId=489&seriesId=3398&timeStart=now-1days&timeEnd=now%2B4days&auto=true';
+    const response = await fetch(url);
+    const data = await response.json();
+    
+    // Extraemos la serie de pronóstico
+    const pronosticoRio = data[0].series[0].pronostico.map(p => ({
+      fechaHora: p.timestart,
+      nivelMetros: p.valor
+    }));
+
+    res.json(pronosticoRio);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "No se pudo obtener el nivel del río" });
+  }
+});app.listen(PORT, () => {
   console.log(`Servidor ejecutándose en http://localhost:${PORT}`);
 });
