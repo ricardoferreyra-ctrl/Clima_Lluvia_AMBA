@@ -56,12 +56,22 @@ app.get('/api/lluvia-todas', async (req, res) => {
 app.get('/api/rio-escobar', async (req, res) => {
   try {
     const url = 'https://alerta.ina.gob.ar/pub/gui/datosProno?calId=489&seriesId=3398&timeStart=now-1days&timeEnd=now%2B4days&auto=true';
-    const response = await fetch(url);
+    
+    // Agregamos User-Agent para evitar que el servidor del INA bloquee a Render
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`INA responde con status ${response.status}`);
+    }
+
     const data = await response.json();
 
-    // Validar que la respuesta sea un arreglo con datos válidos
-    if (!Array.isArray(data) || data.length === 0 || !data[0].series || data[0].series.length === 0) {
-      return res.status(404).json({ error: "Sin datos disponibles del INA" });
+    if (!Array.isArray(data) || data.length === 0 || !data[0].series) {
+      return res.status(404).json({ error: "Estructura de datos del INA no válida" });
     }
 
     const serieProno = data[0].series.find(s => s.qualifier === 'prono') || data[0].series[0];
@@ -74,8 +84,8 @@ app.get('/api/rio-escobar', async (req, res) => {
 
     res.json(pronosticoRio);
   } catch (error) {
-    console.error("Error al consultar INA:", error);
-    res.status(500).json({ error: "No se pudo obtener el nivel del río" });
+    console.error("Error al consultar INA:", error.message);
+    res.status(500).json({ error: "No se pudo obtener el nivel del río", detalle: error.message });
   }
 });
 });app.listen(PORT, () => {
